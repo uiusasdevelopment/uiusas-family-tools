@@ -1,0 +1,709 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UIUSAS PTS Maker PRO - Caso ClÃ­nico RosÃ¢ngela</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      main {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+      #pts-paper {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        max-width: 210mm !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 10mm 14mm !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-rose-50/20 to-slate-200 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Header Principal com NavegaÃ§Ã£o Integrada -->
+  <header class="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white shadow-xl px-6 py-2.5 flex flex-wrap justify-between items-center border-b border-rose-900/40 relative z-20 no-print">
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 flex items-center justify-center shadow-lg shadow-rose-500/25 ring-2 ring-white/20">
+        <i data-lucide="clipboard-check" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent">
+            UIUSAS PTS Maker
+          </h1>
+          <span class="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/30">
+            PRO
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium">Projeto TerapÃªutico Singular â€¢ Caso ClÃ­nico: FamÃ­lia de RosÃ¢ngela</p>
+      </div>
+    </div>
+
+    <!-- NavegaÃ§Ã£o e BotÃµes de ExportaÃ§Ã£o -->
+    <div class="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
+      <a href="genograma.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="dna" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span>Genograma</span>
+      </a>
+
+      <a href="ecomapa.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="share-2" class="w-3.5 h-3.5 text-teal-400"></i>
+        <span>Ecomapa</span>
+      </a>
+
+      <!-- Exportar PNG -->
+      <button id="btn-export-png" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md transition transform active:scale-95">
+        <i data-lucide="image" class="w-3.5 h-3.5"></i>
+        <span>PNG</span>
+      </button>
+
+      <!-- Exportar PDF -->
+      <button id="btn-export-pdf" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-lg transition transform active:scale-95">
+        <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+        <span>Exportar PDF</span>
+      </button>
+
+      <button id="btn-clear" class="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition" title="Limpar tudo">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Container -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+    
+    <!-- Sidebar: FormulÃ¡rio de Preenchimento do PTS -->
+    <aside class="w-full lg:w-[420px] bg-white/95 border-r border-slate-200/80 p-4.5 flex flex-col gap-4 overflow-y-auto no-print shadow-sm z-10">
+      
+      <!-- CabeÃ§alho do Laudo / IdentificaÃ§Ã£o -->
+      <section class="bg-rose-50/60 p-3.5 rounded-2xl border border-rose-100 shadow-sm space-y-2.5">
+        <h2 class="text-xs font-bold text-rose-900 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-rose-600"></i>
+          IdentificaÃ§Ã£o do Caso & Equipe
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-2">
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">UsuÃ¡rio(a) Principal (Caso Ãndice)</label>
+            <input type="text" id="in-user-name" value="RosÃ¢ngela" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Idade / GestaÃ§Ã£o</label>
+            <input type="text" id="in-user-age" value="Gestante (27Âª semana - 5Âº filho)" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Companheiro / Filhos</label>
+            <input type="text" id="in-user-doc" value="Cônjuge e 2 filhos" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Equipe ResponsÃ¡vel (Alunos/TÃ©cnicos)</label>
+            <input type="text" id="in-resp-name" value="Wilson Rodrigues, AndrÃ© Matos, Ãtalo Denner, Ana Beatriz Mamede" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Unidade / ServiÃ§os Articulados</label>
+            <input type="text" id="in-unit-name" value="USF de ReferÃªncia â€¢ CAPS â€¢ PrÃ©-Natal Alto Risco" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+        </div>
+      </section>
+
+      <!-- FASE 1: DiagnÃ³stico e Vulnerabilidades por Membro -->
+      <section class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center">1</span>
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">DiagnÃ³stico Situacional por Membro</h2>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">RosÃ¢ngela (Gestante)</label>
+          <textarea id="in-diag-rosangela" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">InsÃ´nia, estresse, tristeza, choro frequente; hipertensÃ£o arterial (HA) com histÃ³rico de prÃ©-eclÃ¢mpsia anterior; hipÃ³tese de diabetes mellitus gestacional (DMG); renda instÃ¡vel; transporte inacessÃ­vel para prÃ©-natal especializado; vÃ­tima de violÃªncia verbal/moral e intimidaÃ§Ã£o pelo marido alcoolista.</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Ana Clara (16 anos - Filha mais velha)</label>
+          <textarea id="in-diag-anaclara" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">Faltas frequentes na escola por sobrecarga no cuidado dos irmÃ£os (parentificaÃ§Ã£o); relaÃ§Ãµes sexuais desprotegidas sem uso regular de preservativo/anticoncepcional; anseio por fazer curso profissionalizante.</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Pedro (11 anos - Filho com TEA)</label>
+          <textarea id="in-diag-pedro" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">TEA (nÃ­vel de suporte moderado); dificuldades na comunicaÃ§Ã£o social; hipersensibilidade auditiva; seletividade alimentar; acompanhamento irregular no CAPS por barreira de transporte; dificuldade de inclusÃ£o escolar e crises de desregulaÃ§Ã£o com mudanÃ§as na rotina.</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Marcos (40 anos - Companheiro)</label>
+          <input type="text" id="in-diag-marcos" value="Trabalho informal (ajudante pedreiro); consumo frequente de Ã¡lcool nos fins de semana com episÃ³dios de agressividade verbal; resistÃªncia Ã s orientaÃ§Ãµes da USF." class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        </div>
+      </section>
+
+      <!-- FASE 2: Metas (Curto, MÃ©dio e Longo Prazo) -->
+      <section class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center">2</span>
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">DefiniÃ§Ã£o de Metas (Pactuadas no Caderno)</h2>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Curto Prazo (Imediato)</label>
+          <textarea id="in-meta-curto" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">Garantir assistÃªncia adequada Ã  GestaÃ§Ã£o de Alto Risco (GAR) de RosÃ¢ngela; fornecer acompanhamento psicolÃ³gico a RosÃ¢ngela e Pedro; intervir nas situaÃ§Ãµes de violÃªncia (RosÃ¢ngela) e de evasÃ£o escolar de Ana Clara; garantir a continuidade das terapias e a inclusÃ£o escolar de Pedro.</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">MÃ©dio Prazo (1 a 3 meses)</label>
+          <textarea id="in-meta-medio" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">Reduzir o consumo de Ã¡lcool por Marcos; promover a saÃºde sexual e reprodutiva de Ana Clara (orientaÃ§Ã£o, anticoncepÃ§Ã£o e prevenÃ§Ã£o de ISTs).</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Longo Prazo (ApÃ³s o parto / 6 meses)</label>
+          <textarea id="in-meta-longo" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-rose-500 focus:outline-none">Reduzir a vulnerabilidade socioeconÃ´mica e fortalecer a rede de apoio familiar; manter o controle pressÃ³rico e glicÃªmico rigoroso de RosÃ¢ngela no puerpÃ©rio.</textarea>
+        </div>
+      </section>
+
+      <!-- FASE 3: DivisÃ£o de Responsabilidades -->
+      <section class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">3</span>
+            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">DivisÃ£o de Responsabilidades (AÃ§Ãµes)</h2>
+          </div>
+          <button id="btn-add-action" class="text-xs text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Nova AÃ§Ã£o
+          </button>
+        </div>
+
+        <div id="actions-input-container" class="space-y-2"></div>
+      </section>
+
+      <!-- FASE 4: Gestor de Curso do Caso & ReavaliaÃ§Ã£o -->
+      <section class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-xs flex items-center justify-center">4</span>
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">TÃ©cnica do Gestor de Curso do Caso & ReavaliaÃ§Ã£o</h2>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Gestores de Curso do Caso</label>
+          <input type="text" id="in-gestor-caso" value="MÃ©dico(a) + Assistente Social da USF" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">EstratÃ©gia de Acompanhamento Compartilhado</label>
+          <textarea id="in-estrategia-reaval" rows="3" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">Acompanhamento compartilhado, escuta qualificada, busca ativa e articulaÃ§Ã£o intersetorial, com participaÃ§Ã£o da famÃ­lia nas decisÃµes terapÃªuticas. Realizar encontros periÃ³dicos para avaliar a evoluÃ§Ã£o dos problemas identificados, a adesÃ£o Ã s intervenÃ§Ãµes e a necessidade de ajustes no PTS. Papel do Gestor: coordenar o cuidado, acompanhar os encaminhamentos, articular os serviÃ§os da rede e garantir a continuidade da assistÃªncia.</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Data da 1Âª ReavaliaÃ§Ã£o</label>
+            <input type="date" id="in-review-date" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Periodicidade dos Encontros</label>
+            <select id="in-periodicity" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none bg-white">
+              <option value="Semanal">Semanal (Visitas ACS)</option>
+              <option value="Quinzenal" selected>Quinzenal (Consultas)</option>
+              <option value="Mensal">Mensal (Equipe Multiprofissional)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- Laudo Oficial PTS Formatado em A4 Retrato Oficial -->
+    <main class="flex-1 p-4 lg:p-6 overflow-auto flex justify-center items-start">
+      
+      <!-- Folha A4 Retrato Exata (210mm x 297mm) -->
+      <div id="pts-paper" class="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-[800px] min-h-[1130px] max-w-[800px] flex flex-col p-7 transition-all box-border relative">
+        
+        <!-- CabeÃ§alho Oficial -->
+        <header class="border-b-2 border-rose-500/20 pb-3 mb-3 flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="h-2 w-2 rounded-full bg-rose-600"></span>
+              <span class="text-[9.5px] uppercase tracking-widest font-extrabold text-rose-600">
+                AtenÃ§Ã£o PrimÃ¡ria Ã  SaÃºde â€¢ NASF â€¢ Rede de AtenÃ§Ã£o Psicossocial
+              </span>
+            </div>
+            <h1 class="text-xl font-black text-slate-900 tracking-tight">
+              PROJETO TERAPÃŠUTICO SINGULAR (PTS)
+            </h1>
+            <p class="text-[11px] text-slate-500">Planejamento Integrado de Cuidado Centrado na FamÃ­lia e TerritÃ³rio</p>
+          </div>
+
+          <div class="text-right">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200/60 text-rose-950 text-xs font-extrabold shadow-sm">
+              <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-rose-600"></i>
+              <span>UIUSAS PTS</span>
+            </div>
+            <p class="text-[9.5px] text-slate-400 mt-0.5">Caso ClÃ­nico: RosÃ¢ngela</p>
+          </div>
+        </header>
+
+        <!-- Bloco 1: IdentificaÃ§Ã£o -->
+        <section class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 mb-3 text-xs">
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <span class="text-slate-500 text-[9.5px] uppercase font-bold block">UsuÃ¡ria de ReferÃªncia</span>
+              <strong id="out-user-name" class="text-slate-900 text-xs">RosÃ¢ngela</strong>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[9.5px] uppercase font-bold block">Idade / SituaÃ§Ã£o ObstÃ©trica</span>
+              <span id="out-user-age" class="text-slate-700 font-semibold text-[11px]">Gestante (27Âª sem - 5Âº filho)</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[9.5px] uppercase font-bold block">ComposiÃ§Ã£o Familiar Residente</span>
+              <span id="out-user-doc" class="text-slate-700 text-[10.5px]">Marcos (40a), Ana Clara (16a), Pedro (11a TEA)</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2 pt-1.5 border-t border-slate-200/70">
+            <div class="col-span-2">
+              <span class="text-slate-500 text-[9.5px] uppercase font-bold block">Equipe de Responsabilidade (Alunos / TÃ©cnicos)</span>
+              <strong id="out-resp-name" class="text-rose-900 text-[11px]">Wilson Rodrigues, AndrÃ© Matos, Ãtalo Denner, Ana Beatriz Mamede</strong>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[9.5px] uppercase font-bold block">Data do PTS</span>
+              <span id="out-date" class="text-slate-700 font-medium text-[11px]">06/11/2026</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bloco 2: AnÃ¡lise / DiagnÃ³stico Situacional das AnotaÃ§Ãµes -->
+        <section class="mb-3">
+          <div class="flex items-center gap-1.5 mb-1.5 pb-0.5 border-b border-rose-100">
+            <span class="w-3.5 h-3.5 rounded bg-rose-600 text-white font-bold text-[9px] flex items-center justify-center">1</span>
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-800">AnÃ¡lise e DiagnÃ³stico Situacional</h2>
+          </div>
+          
+          <div class="space-y-1.5 text-xs">
+            <div class="bg-rose-50/50 p-2 rounded-lg border border-rose-100/80">
+              <span class="font-bold text-rose-950 text-[11px] block mb-0.5">â€¢ RosÃ¢ngela:</span>
+              <p id="out-diag-rosangela" class="text-slate-700 leading-snug text-[10.5px]"></p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/80">
+                <span class="font-bold text-amber-950 text-[11px] block mb-0.5">â€¢ Ana Clara (16 anos):</span>
+                <p id="out-diag-anaclara" class="text-slate-700 leading-snug text-[10.5px]"></p>
+              </div>
+
+              <div class="bg-indigo-50/50 p-2 rounded-lg border border-indigo-100/80">
+                <span class="font-bold text-indigo-950 text-[11px] block mb-0.5">â€¢ Pedro (11 anos - TEA):</span>
+                <p id="out-diag-pedro" class="text-slate-700 leading-snug text-[10.5px]"></p>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-900 text-[11px]">â€¢ Marcos (40 anos - Companheiro):</span>
+              <span id="out-diag-marcos" class="text-slate-700 text-[10.5px] ml-1"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bloco 3: Metas do Caderno -->
+        <section class="mb-3">
+          <div class="flex items-center gap-1.5 mb-1.5 pb-0.5 border-b border-amber-100">
+            <span class="w-3.5 h-3.5 rounded bg-amber-600 text-white font-bold text-[9px] flex items-center justify-center">2</span>
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-800">Metas Pactuadas (Curto, MÃ©dio e Longo Prazo)</h2>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div class="p-2 rounded-lg border border-slate-200 bg-white">
+              <div class="flex items-center gap-1 text-amber-700 font-bold text-[10px] uppercase mb-1">
+                <i data-lucide="clock" class="w-3 h-3"></i> Curto Prazo (Imediato)
+              </div>
+              <p id="out-meta-curto" class="text-slate-700 text-[10px] leading-relaxed"></p>
+            </div>
+            
+            <div class="p-2 rounded-lg border border-slate-200 bg-white">
+              <div class="flex items-center gap-1 text-indigo-700 font-bold text-[10px] uppercase mb-1">
+                <i data-lucide="calendar" class="w-3 h-3"></i> MÃ©dio Prazo (1-3 meses)
+              </div>
+              <p id="out-meta-medio" class="text-slate-700 text-[10px] leading-relaxed"></p>
+            </div>
+
+            <div class="p-2 rounded-lg border border-slate-200 bg-white">
+              <div class="flex items-center gap-1 text-emerald-700 font-bold text-[10px] uppercase mb-1">
+                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Longo Prazo (PuerpÃ©rio)
+              </div>
+              <p id="out-meta-longo" class="text-slate-700 text-[10px] leading-relaxed"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bloco 4: Tabela de DivisÃ£o de Responsabilidades -->
+        <section class="mb-3 flex-1">
+          <div class="flex items-center gap-1.5 mb-1.5 pb-0.5 border-b border-emerald-100">
+            <span class="w-3.5 h-3.5 rounded bg-emerald-600 text-white font-bold text-[9px] flex items-center justify-center">3</span>
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-800">DivisÃ£o de Responsabilidades e Encaminhamentos</h2>
+          </div>
+
+          <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold">
+              <tr>
+                <th class="py-1 px-2.5 border-b border-slate-200 w-1/4">Ator / Setor</th>
+                <th class="py-1 px-2.5 border-b border-slate-200 w-1/2">AÃ§Ã£o / AtribuiÃ§Ã£o Definida</th>
+                <th class="py-1 px-2.5 border-b border-slate-200 w-1/4">Prazo / Forma</th>
+              </tr>
+            </thead>
+            <tbody id="out-actions-table-body" class="divide-y divide-slate-100 text-[10.5px]"></tbody>
+          </table>
+        </section>
+
+        <!-- Bloco 5: TÃ©cnica do Gestor do Curso do Caso & ReavaliaÃ§Ã£o -->
+        <section class="mb-3">
+          <div class="flex items-center gap-1.5 mb-1.5 pb-0.5 border-b border-indigo-100">
+            <span class="w-3.5 h-3.5 rounded bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center">4</span>
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-800">TÃ©cnica do Gestor de Curso do Caso & ReavaliaÃ§Ã£o</h2>
+          </div>
+
+          <div class="bg-indigo-50/40 p-2 rounded-lg border border-indigo-100 text-xs">
+            <div class="flex justify-between items-center mb-1">
+              <div>
+                <span class="text-slate-500 text-[10px]">Gestor(es) do Caso:</span>
+                <strong id="out-gestor-caso" class="text-indigo-950 font-bold ml-1 text-[11px]">MÃ©dico + Assistente Social</strong>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px]">ReavaliaÃ§Ã£o Prevista:</span>
+                <strong id="out-review-date" class="text-indigo-950 font-bold ml-1 text-[11px]">10/12/2026</strong>
+                <span class="text-slate-400 mx-1">â€¢</span>
+                <span id="out-periodicity" class="text-indigo-800 font-semibold text-[10px]">Quinzenal</span>
+              </div>
+            </div>
+            <p id="out-estrategia-reaval" class="text-[10px] text-slate-700 leading-snug italic"></p>
+          </div>
+        </section>
+
+        <!-- Campo de Assinaturas e PactuaÃ§Ã£o -->
+        <footer class="mt-auto pt-3 border-t-2 border-slate-200">
+          <div class="grid grid-cols-2 gap-8 text-center text-xs">
+            <div class="border-t border-slate-400 pt-1">
+              <strong id="out-sig-user" class="text-slate-800 block text-[11px]">RosÃ¢ngela (UsuÃ¡ria)</strong>
+              <span class="text-slate-500 text-[9.5px]">UsuÃ¡ria / Representante Familiar</span>
+            </div>
+            <div class="border-t border-slate-400 pt-1">
+              <strong class="text-slate-800 block text-[11px]">Equipe USF / Gestor do Caso</strong>
+              <span class="text-slate-500 text-[9.5px]">Profissionais de ReferÃªncia</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-[8.5px] text-slate-400 mt-2">
+            <span>UIUSAS PTS Maker PRO â€¢ MinistÃ©rio da SaÃºde / HumanizaSUS</span>
+            <span>Documento de PactuaÃ§Ã£o e Acompanhamento ClÃ­nico Singular</span>
+          </div>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // InicializaÃ§Ã£o da Data
+    const today = new Date();
+    document.getElementById('out-date').textContent = today.toLocaleDateString('pt-BR');
+
+    const revDate = new Date();
+    revDate.setDate(today.getDate() + 21);
+    document.getElementById('in-review-date').value = revDate.toISOString().split('T')[0];
+    document.getElementById('out-review-date').textContent = revDate.toLocaleDateString('pt-BR');
+
+    lucide.createIcons();
+
+    // Estado das AÃ§Ãµes extraÃ­das EXATAMENTE do caderno manuscrito:
+    const state = {
+      actions: [
+        {
+          id: '1',
+          actor: 'Equipe da USF (Medicina e Enfermagem)',
+          task: 'Coordenar o cuidado, acompanhar a famÃ­lia e articular os demais serviÃ§os de rede; realizar visitas domiciliares.',
+          deadline: 'ContÃ­nuo / Visitas'
+        },
+        {
+          id: '2',
+          actor: 'Escola (Setor Socioemocional)',
+          task: 'Colaborar com estratÃ©gias de inclusÃ£o de Pedro e prevenÃ§Ã£o da evasÃ£o escolar de Ana Clara.',
+          deadline: 'Acompanhamento letivo'
+        },
+        {
+          id: '3',
+          actor: 'AssistÃªncia Social',
+          task: 'Avaliar vulnerabilidades, benefÃ­cios sociais e possibilidades de apoio Ã  famÃ­lia + elaboraÃ§Ã£o de plano de seguranÃ§a familiar.',
+          deadline: 'Curto prazo'
+        },
+        {
+          id: '4',
+          actor: 'PsicÃ³logos',
+          task: 'Escuta qualificada, avaliaÃ§Ã£o de sintomas depressivos e acompanhamento com avaliaÃ§Ã£o de risco.',
+          deadline: 'Semanal'
+        },
+        {
+          id: '5',
+          actor: 'MÃ©dico + PsicÃ³logos',
+          task: 'Abordagem do padrÃ£o de consumo alcoÃ³lico de Marcos.',
+          deadline: 'MÃ©dio prazo'
+        },
+        {
+          id: '6',
+          actor: 'Equipe Multiprofissional',
+          task: 'Atendimento individual e orientaÃ§Ã£o sobre contracepÃ§Ã£o e ISTs para Ana Clara + promover curso profissionalizante.',
+          deadline: 'Curto / MÃ©dio prazo'
+        },
+        {
+          id: '7',
+          actor: 'USF + CAPS',
+          task: 'Articular continuidade das terapias, avaliar necessidade de transporte e manejo comportamental para Pedro.',
+          deadline: 'Imediato'
+        }
+      ]
+    };
+
+    const actionsInputContainer = document.getElementById('actions-input-container');
+    const outActionsTableBody = document.getElementById('out-actions-table-body');
+
+    function renderActions() {
+      // 1. Inputs na Barra Lateral
+      actionsInputContainer.innerHTML = '';
+      state.actions.forEach((act, idx) => {
+        const item = document.createElement('div');
+        item.className = 'bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs space-y-1 relative';
+        item.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-slate-700">#${idx + 1} - ${act.actor.split('(')[0]}</span>
+            <button data-id="${act.id}" class="btn-del-action text-slate-400 hover:text-rose-600 transition">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <input type="text" data-field="actor" data-id="${act.id}" value="${act.actor}" placeholder="Setor / Ator..." class="in-action-field w-full text-xs font-semibold border border-slate-300 rounded px-2 py-1 bg-white">
+          <textarea data-field="task" data-id="${act.id}" rows="2" placeholder="AÃ§Ã£o..." class="in-action-field w-full text-xs border border-slate-300 rounded px-2 py-1 bg-white">${act.task}</textarea>
+          <input type="text" data-field="deadline" data-id="${act.id}" value="${act.deadline}" placeholder="Prazo..." class="in-action-field w-full text-xs border border-slate-300 rounded px-2 py-1 bg-white">
+        `;
+        actionsInputContainer.appendChild(item);
+      });
+
+      // 2. Tabela de SaÃ­da no Documento A4
+      outActionsTableBody.innerHTML = '';
+      state.actions.forEach((act, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+        tr.innerHTML = `
+          <td class="py-1.5 px-2.5 font-bold text-slate-800 text-[10px] align-top">${act.actor}</td>
+          <td class="py-1.5 px-2.5 text-slate-700 leading-snug align-top">${act.task}</td>
+          <td class="py-1.5 px-2.5 text-slate-600 font-medium align-top">${act.deadline}</td>
+        `;
+        outActionsTableBody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.btn-del-action').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          state.actions = state.actions.filter(a => a.id !== id);
+          renderActions();
+        });
+      });
+
+      document.querySelectorAll('.in-action-field').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const id = e.target.getAttribute('data-id');
+          const field = e.target.getAttribute('data-field');
+          const act = state.actions.find(a => a.id === id);
+          if (act) {
+            act[field] = e.target.value;
+            updateTableOnly();
+          }
+        });
+      });
+
+      lucide.createIcons();
+    }
+
+    function updateTableOnly() {
+      outActionsTableBody.innerHTML = '';
+      state.actions.forEach((act, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+        tr.innerHTML = `
+          <td class="py-1.5 px-2.5 font-bold text-slate-800 text-[10px] align-top">${act.actor}</td>
+          <td class="py-1.5 px-2.5 text-slate-700 leading-snug align-top">${act.task}</td>
+          <td class="py-1.5 px-2.5 text-slate-600 font-medium align-top">${act.deadline}</td>
+        `;
+        outActionsTableBody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('btn-add-action').addEventListener('click', () => {
+      state.actions.push({
+        id: String(Date.now()),
+        actor: 'Nova Equipe / Setor',
+        task: 'Descreva a aÃ§Ã£o pactuada...',
+        deadline: 'A definir'
+      });
+      renderActions();
+    });
+
+    // Mapeamento bidirecional em tempo real
+    function syncField(inId, outId) {
+      const inEl = document.getElementById(inId);
+      const outEl = document.getElementById(outId);
+      if (!inEl || !outEl) return;
+
+      const update = () => { outEl.textContent = inEl.value.trim() || 'â€”'; };
+      inEl.addEventListener('input', update);
+      update();
+    }
+
+    syncField('in-user-name', 'out-user-name');
+    syncField('in-user-name', 'out-sig-user');
+    syncField('in-user-age', 'out-user-age');
+    syncField('in-user-doc', 'out-user-doc');
+    syncField('in-resp-name', 'out-resp-name');
+
+    syncField('in-diag-rosangela', 'out-diag-rosangela');
+    syncField('in-diag-anaclara', 'out-diag-anaclara');
+    syncField('in-diag-pedro', 'out-diag-pedro');
+    syncField('in-diag-marcos', 'out-diag-marcos');
+
+    syncField('in-meta-curto', 'out-meta-curto');
+    syncField('in-meta-medio', 'out-meta-medio');
+    syncField('in-meta-longo', 'out-meta-longo');
+
+    syncField('in-gestor-caso', 'out-gestor-caso');
+    syncField('in-estrategia-reaval', 'out-estrategia-reaval');
+    syncField('in-periodicity', 'out-periodicity');
+
+    document.getElementById('in-review-date').addEventListener('change', (e) => {
+      if (e.target.value) {
+        const [y, m, d] = e.target.value.split('-');
+        document.getElementById('out-review-date').textContent = `${d}/${m}/${y}`;
+      }
+    });
+
+    // Limpar
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('Deseja limpar todos os campos?')) {
+        document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+        state.actions = [];
+        renderActions();
+      }
+    });
+
+    // ========================================================
+    // EXPORTAÃ‡ÃƒO EM ALTA DEFINIÃ‡ÃƒO (PNG e PDF A4 Retrato)
+    // ========================================================
+    async function capturePaperElement() {
+      const element = document.getElementById('pts-paper');
+      return await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: 800
+      });
+    }
+
+    document.getElementById('btn-export-png').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-export-png');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Gerando...`;
+      lucide.createIcons();
+
+      try {
+        const canvas = await capturePaperElement();
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `PTS_Familia_Rosangela_${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = imgData;
+        link.click();
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao gerar PNG.');
+      } finally {
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
+    });
+
+    document.getElementById('btn-export-pdf').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-export-pdf');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Gerando...`;
+      lucide.createIcons();
+
+      try {
+        const canvas = await capturePaperElement();
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        pdf.save(`PTS_Familia_Rosangela_${new Date().toISOString().slice(0, 10)}.pdf`);
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao gerar PDF.');
+      } finally {
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
+    });
+
+    renderActions();
+  </script>
+</body>
+</html>
+

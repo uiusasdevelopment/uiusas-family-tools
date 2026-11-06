@@ -1,0 +1,645 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UIUSAS Ecomapa Maker PRO - FamÃ­lia de RosÃ¢ngela</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @page { size: A4 landscape; margin: 0; }
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      #pdf-content { width: 297mm !important; height: 210mm !important; max-width: 297mm !important; min-height: 210mm !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 8mm 10mm !important; }
+    }
+    .canvas-grid { background-size: 24px 24px; background-image: radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-teal-50/20 to-slate-200 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white shadow-xl px-6 py-2.5 flex flex-wrap justify-between items-center border-b border-teal-900/40 relative z-20 no-print">
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/25 ring-2 ring-white/20">
+        <i data-lucide="share-2" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-teal-100 to-teal-300 bg-clip-text text-transparent">
+            UIUSAS Ecomapa Maker
+          </h1>
+          <span class="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
+            CASO ROSÃ‚NGELA
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium">Alunos: Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 mt-2 sm:mt-0">
+      <a href="genograma.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="dna" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span>Genograma</span>
+      </a>
+
+      <a href="pts.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-rose-400"></i>
+        <span>PTS</span>
+      </a>
+
+      <button id="btn-export-png" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md transition transform active:scale-95">
+        <i data-lucide="image" class="w-3.5 h-3.5"></i>
+        <span>PNG</span>
+      </button>
+
+      <button id="btn-export-pdf" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-lg transition transform active:scale-95">
+        <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+        <span>Exportar PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Container -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+    
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-96 bg-white/95 border-r border-slate-200/80 p-4 flex flex-col gap-3.5 overflow-y-auto no-print shadow-sm z-10">
+      
+      <section class="bg-teal-50/60 p-3 rounded-xl border border-teal-100 shadow-sm space-y-2">
+        <h2 class="text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="file-signature" class="w-3.5 h-3.5 text-teal-600"></i>
+          Dados da Equipe & Laudo
+        </h2>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Alunos / ResponsÃ¡veis</label>
+          <input type="text" id="input-responsible" value="Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">TÃ­tulo</label>
+            <input type="text" id="input-report-title" value="Ecomapa Familiar - FamÃ­lia de RosÃ¢ngela" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Data</label>
+            <input type="date" id="input-date" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+          </div>
+        </div>
+      </section>
+
+      <!-- FormulÃ¡rio de DomÃ­nio -->
+      <section id="element-form-card" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 id="form-title" class="text-xs font-bold text-slate-800 uppercase tracking-wider">DomÃ­nio ComunitÃ¡rio</h2>
+          <span id="badge-editing" class="hidden text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">EdiÃ§Ã£o</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Nome do DomÃ­nio</label>
+          <input type="text" id="elem-name" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Cor / Categoria</label>
+            <select id="elem-color" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+              <option value="teal">SaÃºde / USF</option>
+              <option value="indigo">Escola / EducaÃ§Ã£o</option>
+              <option value="amber">Trabalho / ConstruÃ§Ã£o</option>
+              <option value="rose">PrÃ©-Natal Especializado</option>
+              <option value="purple">CAPS</option>
+              <option value="dashed">Anseio / Projeto Futuro</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Tipo</label>
+            <select id="elem-type" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+              <option value="domain">Sistema ComunitÃ¡rio</option>
+              <option value="center">FamÃ­lia Central</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">AnotaÃ§Ãµes / DescriÃ§Ã£o</label>
+          <textarea id="elem-notes" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button id="btn-save-elem" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 rounded-lg transition">
+            Salvar DomÃ­nio
+          </button>
+          <button id="btn-cancel-edit" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg">
+            Cancelar
+          </button>
+        </div>
+      </section>
+
+      <!-- InstruÃ§Ãµes das RelaÃ§Ãµes do Manuscrito -->
+      <section class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5">
+        <span class="font-bold text-slate-800 text-[11px] block">ConvenÃ§Ãµes Conforme o Manuscrito:</span>
+        <div class="space-y-1 text-[10.5px]">
+          <p>â€¢ <strong>Zigue-zague:</strong> RelaÃ§Ã£o estressante (ServiÃ§o de prÃ©-natal em outro bairro).</p>
+          <p>â€¢ <strong>Linha contÃ­nua c/ setas:</strong> RelaÃ§Ã£o fraca, requer esforÃ§o, mas nÃ£o estressante (USF e Escola).</p>
+          <p>â€¢ <strong>Linha tracejada c/ setas:</strong> RelaÃ§Ã£o incerta, de frequÃªncia irregular (CAPS e ConstruÃ§Ã£o civil).</p>
+          <p>â€¢ <strong>CÃ­rculo pontilhado c/ X:</strong> Curso profissionalizante (Anseio de Ana Clara).</p>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- Canvas Central -->
+    <main class="flex-1 p-4 lg:p-6 overflow-auto flex justify-center items-start">
+      
+      <div id="pdf-content" class="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-[1040px] h-[730px] max-w-[1040px] max-h-[730px] flex flex-col p-6 transition-all relative overflow-hidden box-border">
+        
+        <!-- Topo do Documento -->
+        <div class="border-b-2 border-teal-500/20 pb-2.5 mb-2 flex justify-between items-start flex-shrink-0">
+          <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="h-2 w-2 rounded-full bg-teal-600"></span>
+              <span class="text-[10px] uppercase tracking-widest font-bold text-teal-600">
+                AvaliaÃ§Ã£o SistÃªmica e Apoio ComunitÃ¡rio
+              </span>
+            </div>
+            <h2 id="display-report-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Ecomapa Familiar - FamÃ­lia de RosÃ¢ngela
+            </h2>
+            <div class="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
+              <div class="flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                <span>Data: <strong id="display-date" class="text-slate-700"></strong></span>
+              </div>
+              <span class="text-slate-300">â€¢</span>
+              <div class="flex items-center gap-1 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
+                <i data-lucide="users" class="w-3 h-3 text-teal-600"></i>
+                <span class="text-slate-600">Alunos: <strong id="display-responsible" class="text-teal-900 font-bold">Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-right">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/60 text-teal-950 text-xs font-extrabold shadow-sm">
+              <i data-lucide="share-2" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span>UIUSAS ECOMAPA</span>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-0.5 font-medium">Rede de Suporte e Energia Social</p>
+          </div>
+        </div>
+
+        <!-- Ãrea do Canvas SVG -->
+        <div id="ecomap-canvas-container" class="relative flex-1 w-full h-[455px] min-h-[455px] max-h-[455px] bg-white border border-slate-200 rounded-xl canvas-grid overflow-hidden flex-shrink-0">
+          
+          <div class="absolute top-2 right-2 text-[10px] bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-slate-500 no-print flex items-center gap-1.5 shadow-sm z-10">
+            <i data-lucide="mouse-pointer-click" class="w-3 h-3 text-teal-600"></i>
+            <span>Clique num domÃ­nio para <strong>editar</strong> ou arraste para <strong>posicionar</strong></span>
+          </div>
+
+          <svg id="ecomap-svg" viewBox="0 0 990 455" class="w-full h-full select-none">
+            <defs>
+              <marker id="arrow-fwd-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0f172a" />
+              </marker>
+              <marker id="arrow-bwd-teal" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 10 1.5 L 2 5 L 10 8.5 z" fill="#0f172a" />
+              </marker>
+            </defs>
+
+            <g id="svg-links"></g>
+            <g id="svg-nodes"></g>
+          </svg>
+        </div>
+
+        <!-- LEGENDA CONFORME O MANUSCRITO -->
+        <div class="mt-2 p-2 bg-slate-50/90 border border-slate-200/90 rounded-xl text-slate-700 flex-shrink-0">
+          <div class="flex items-center gap-1.5 mb-1 pb-0.5 border-b border-slate-200">
+            <i data-lucide="bookmark" class="w-3 h-3 text-teal-600"></i>
+            <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-800">Legenda Conforme Manuscrito</h3>
+          </div>
+          
+          <div class="grid grid-cols-4 gap-y-1.5 gap-x-4 text-[10px]">
+            <div class="flex items-center gap-2">
+              <svg width="24" height="10" viewBox="0 0 24 10" class="flex-shrink-0">
+                <path d="M 0 5 L 4 1 L 8 9 L 12 1 L 16 9 L 20 1 L 24 5" fill="none" stroke="#ef4444" stroke-width="2" />
+              </svg>
+              <span class="text-rose-700 truncate font-semibold">RelaÃ§Ã£o estressante, em outro bairro</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-slate-800 font-bold text-xs tracking-tight">â—„â€•â€•â–º</span>
+              <span class="truncate"><strong>RelaÃ§Ã£o fraca</strong>, requer esforÃ§o, Ã± estressante</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-slate-500 font-bold text-xs tracking-tight">â—„â”„â”„â–º</span>
+              <span class="truncate"><strong>RelaÃ§Ã£o incerta</strong>, frequÃªncia irregular</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full border border-dashed border-slate-600 relative flex items-center justify-center font-bold text-slate-500 text-[10px]">âœ•</span>
+              <span class="truncate"><strong>Curso Profissionalizante</strong> (Anseio)</span>
+            </div>
+          </div>
+        </div>
+
+        <footer class="mt-1.5 pt-1 text-[9px] text-slate-400 flex justify-between items-center flex-shrink-0">
+          <div class="flex items-center gap-1">
+            <strong class="text-slate-600">UIUSAS Ecomapa Maker PRO</strong>
+            <span>â€¢</span>
+            <span>Estudo de Caso da FamÃ­lia de RosÃ¢ngela â€¢ SaÃºde da FamÃ­lia e Apoio ComunitÃ¡rio</span>
+          </div>
+          <span>PÃ¡gina 1 de 1</span>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const today = new Date();
+    document.getElementById('input-date').value = today.toISOString().split('T')[0];
+    document.getElementById('display-date').textContent = today.toLocaleDateString('pt-BR');
+
+    // ESTADO ESTRITAMENTE IDÃŠNTICO AO MANUSCRITO DA FOLHA
+        const state = {
+      editingId: null,
+      nodes: [
+        { id: 'center', name: 'Família Central', type: 'center', color: 'teal', notes: 'Núcleo familiar atendido', x: 495, y: 227 },
+        { id: '1', name: 'UBS / Saúde', type: 'domain', color: 'teal', notes: 'Acompanhamento na atenção básica', x: 230, y: 115 },
+        { id: '2', name: 'Escola / Educação', type: 'domain', color: 'indigo', notes: 'Frequência escolar', x: 495, y: 385 },
+        { id: '3', name: 'Trabalho / Renda', type: 'domain', color: 'amber', notes: 'Atividade profissional', x: 770, y: 115 },
+        { id: '4', name: 'Rede de Apoio', type: 'domain', color: 'purple', notes: 'Suporte social e amigos', x: 220, y: 335 }
+      ],
+      links: [
+        { id: 'l1', from: 'center', to: '1', type: 'effort', flow: 'both' },
+        { id: 'l2', from: 'center', to: '2', type: 'effort', flow: 'both' },
+        { id: 'l3', from: 'center', to: '3', type: 'irregular', flow: 'both' },
+        { id: 'l4', from: 'center', to: '4', type: 'effort', flow: 'both' }
+      ]
+    };
+
+    lucide.createIcons();
+
+    const inputResp = document.getElementById('input-responsible');
+    const dispResp = document.getElementById('display-responsible');
+    inputResp.addEventListener('input', (e) => { dispResp.textContent = e.target.value.trim() || 'â€”'; });
+
+    const inputTitle = document.getElementById('input-report-title');
+    const dispTitle = document.getElementById('display-report-title');
+    inputTitle.addEventListener('input', (e) => { dispTitle.textContent = e.target.value.trim() || 'Ecomapa'; });
+
+    const formTitle = document.getElementById('form-title');
+    const badgeEditing = document.getElementById('badge-editing');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
+    const inputName = document.getElementById('elem-name');
+    const inputColor = document.getElementById('elem-color');
+    const inputType = document.getElementById('elem-type');
+    const inputNotes = document.getElementById('elem-notes');
+
+    const svg = document.getElementById('ecomap-svg');
+    const linksGroup = document.getElementById('svg-links');
+    const nodesGroup = document.getElementById('svg-nodes');
+
+    let draggedNode = null;
+    let dragMoved = false;
+    let offset = { x: 0, y: 0 };
+    let startPos = { x: 0, y: 0 };
+
+    function wrapText(text, maxChars = 20) {
+      if (!text) return [];
+      const words = text.split(' ');
+      const lines = [];
+      let cur = '';
+      words.forEach(w => {
+        if ((cur + (cur ? ' ' : '') + w).length <= maxChars) cur += (cur ? ' ' : '') + w;
+        else { if (cur) lines.push(cur); cur = w; }
+      });
+      if (cur) lines.push(cur);
+      return lines;
+    }
+
+    function getBorderPoint(n1, n2) {
+      const dx = n2.x - n1.x;
+      const dy = n2.y - n1.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist === 0) return { x: n1.x, y: n1.y };
+      const r = n1.type === 'center' ? 52 : 36;
+      return { x: n1.x + (dx / dist) * r, y: n1.y + (dy / dist) * r };
+    }
+
+    function createZigZagPath(x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+      if (dist === 0) return '';
+      const ux = dx / dist;
+      const uy = dy / dist;
+      const nx = -uy;
+      const ny = ux;
+      const numZigs = Math.max(5, Math.floor(dist / 14));
+      const step = dist / numZigs;
+      const amp = 8;
+      let d = `M ${x1} ${y1}`;
+      for (let i = 1; i < numZigs; i++) {
+        const side = (i % 2 === 1) ? 1 : -1;
+        const px = x1 + ux * (i * step) + nx * (amp * side);
+        const py = y1 + uy * (i * step) + ny * (amp * side);
+        d += ` L ${px.toFixed(1)} ${py.toFixed(1)}`;
+      }
+      d += ` L ${x2} ${y2}`;
+      return d;
+    }
+
+    function loadToEdit(n) {
+      state.editingId = n.id;
+      inputName.value = n.name;
+      inputColor.value = n.color;
+      inputType.value = n.type;
+      inputNotes.value = n.notes;
+
+      formTitle.textContent = 'Editar DomÃ­nio';
+      badgeEditing.classList.remove('hidden');
+      btnCancelEdit.classList.remove('hidden');
+      render();
+    }
+
+    function resetForm() {
+      state.editingId = null;
+      inputName.value = '';
+      inputColor.value = 'teal';
+      inputType.value = 'domain';
+      inputNotes.value = '';
+
+      formTitle.textContent = 'DomÃ­nio ComunitÃ¡rio';
+      badgeEditing.classList.add('hidden');
+      btnCancelEdit.classList.add('hidden');
+      render();
+    }
+
+    btnCancelEdit.addEventListener('click', resetForm);
+
+    document.getElementById('btn-save-elem').addEventListener('click', () => {
+      const name = inputName.value.trim();
+      if (!name) return alert('Digite o nome do domÃ­nio.');
+
+      if (state.editingId) {
+        const n = state.nodes.find(item => item.id === state.editingId);
+        if (n) {
+          n.name = name;
+          n.color = inputColor.value;
+          n.type = inputType.value;
+          n.notes = inputNotes.value.trim();
+        }
+        resetForm();
+      }
+      render();
+    });
+
+    function render() {
+      // 1. LINKS CONFORME O MANUSCRITO
+      linksGroup.innerHTML = '';
+      state.links.forEach(l => {
+        const n1 = state.nodes.find(n => n.id === l.from);
+        const n2 = state.nodes.find(n => n.id === l.to);
+        if (!n1 || !n2) return;
+
+        const pt1 = getBorderPoint(n1, n2);
+        const pt2 = getBorderPoint(n2, n1);
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        if (l.type === 'stressful') {
+          // Zigue-zague autÃªntico
+          const zig = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          zig.setAttribute('d', createZigZagPath(pt1.x, pt1.y, pt2.x, pt2.y));
+          zig.setAttribute('stroke', '#ef4444');
+          zig.setAttribute('stroke-width', '2.5');
+          zig.setAttribute('fill', 'none');
+          g.appendChild(zig);
+
+        } else if (l.type === 'effort') {
+          // Linha dupla com setas nas duas pontas (relaÃ§Ã£o fraca, requer esforÃ§o)
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', pt1.x);
+          line.setAttribute('y1', pt1.y);
+          line.setAttribute('x2', pt2.x);
+          line.setAttribute('y2', pt2.y);
+          line.setAttribute('stroke', '#0f172a');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('marker-start', 'url(#arrow-bwd-teal)');
+          line.setAttribute('marker-end', 'url(#arrow-fwd-teal)');
+          g.appendChild(line);
+
+        } else if (l.type === 'irregular') {
+          // Linha tracejada com setas nas duas pontas (relaÃ§Ã£o incerta, frequÃªncia irregular)
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', pt1.x);
+          line.setAttribute('y1', pt1.y);
+          line.setAttribute('x2', pt2.x);
+          line.setAttribute('y2', pt2.y);
+          line.setAttribute('stroke', '#64748b');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('stroke-dasharray', '6, 5');
+          line.setAttribute('marker-start', 'url(#arrow-bwd-teal)');
+          line.setAttribute('marker-end', 'url(#arrow-fwd-teal)');
+          g.appendChild(line);
+        }
+
+        linksGroup.appendChild(g);
+      });
+
+      // 2. NODES
+      nodesGroup.innerHTML = '';
+      state.nodes.forEach(n => {
+        const isEditing = state.editingId === n.id;
+        const isCenter = n.type === 'center';
+        const isDashed = n.type === 'dashed_goal';
+        const r = isCenter ? 52 : 36;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${n.x}, ${n.y})`);
+        g.setAttribute('data-id', n.id);
+        g.classList.add('cursor-pointer');
+
+        if (isEditing) {
+          const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('r', r + 9);
+          ring.setAttribute('fill', 'none');
+          ring.setAttribute('stroke', '#f59e0b');
+          ring.setAttribute('stroke-width', '2.5');
+          ring.setAttribute('stroke-dasharray', '4, 3');
+          g.appendChild(ring);
+        }
+
+        // CÃ­rculo
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('r', r);
+        circle.setAttribute('fill', isCenter ? '#f0fdfa' : isDashed ? '#f8fafc' : '#ffffff');
+        circle.setAttribute('stroke', isCenter ? '#0d9488' : isDashed ? '#94a3b8' : '#0f172a');
+        circle.setAttribute('stroke-width', isCenter ? '3.5' : '2.2');
+        if (isDashed) {
+          circle.setAttribute('stroke-dasharray', '4, 4');
+        }
+        g.appendChild(circle);
+
+        // Se for o curso com X desenhado em cima (conforme manuscrito)
+        if (isDashed) {
+          const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          l1.setAttribute('x1', -r + 4); l1.setAttribute('y1', -r + 4);
+          l1.setAttribute('x2', r - 4); l1.setAttribute('y2', r - 4);
+          l1.setAttribute('stroke', '#cbd5e1'); l1.setAttribute('stroke-width', '2');
+          g.appendChild(l1);
+
+          const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          l2.setAttribute('x1', r - 4); l2.setAttribute('y1', -r + 4);
+          l2.setAttribute('x2', -r + 4); l2.setAttribute('y2', r - 4);
+          l2.setAttribute('stroke', '#cbd5e1'); l2.setAttribute('stroke-width', '2');
+          g.appendChild(l2);
+        }
+
+        // Borda dupla famÃ­lia
+        if (isCenter) {
+          const inner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          inner.setAttribute('r', r - 7);
+          inner.setAttribute('fill', 'none');
+          inner.setAttribute('stroke', '#14b8a6');
+          inner.setAttribute('stroke-width', '1.8');
+          inner.setAttribute('stroke-dasharray', '3, 3');
+          g.appendChild(inner);
+        }
+
+        // Texto nome
+        const nameLines = wrapText(n.name, isCenter ? 14 : 11);
+        const spacing = isCenter ? 13 : 11;
+        const startY = -((nameLines.length - 1) * spacing) / 2;
+
+        nameLines.forEach((line, idx) => {
+          const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t.setAttribute('x', 0);
+          t.setAttribute('y', startY + (idx * spacing));
+          t.setAttribute('text-anchor', 'middle');
+          t.setAttribute('dominant-baseline', 'central');
+          t.setAttribute('fill', isCenter ? '#134e4a' : '#0f172a');
+          t.setAttribute('font-size', isCenter ? '11px' : '9.5px');
+          t.setAttribute('font-weight', '700');
+          t.textContent = line;
+          g.appendChild(t);
+        });
+
+        // Notas abaixo
+        if (n.notes) {
+          const notesLines = wrapText(n.notes, 24);
+          const maxW = Math.min(170, Math.max(65, n.notes.length * 6.2));
+          const cardH = 8 + (notesLines.length * 11);
+
+          const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          textBg.setAttribute('x', -maxW / 2);
+          textBg.setAttribute('y', r + 4);
+          textBg.setAttribute('width', maxW);
+          textBg.setAttribute('height', cardH);
+          textBg.setAttribute('fill', 'rgba(255, 255, 255, 0.95)');
+          textBg.setAttribute('stroke', '#e2e8f0');
+          textBg.setAttribute('rx', '4');
+          g.appendChild(textBg);
+
+          notesLines.forEach((l, idx) => {
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            t.setAttribute('x', 0);
+            t.setAttribute('y', r + 13 + (idx * 11));
+            t.setAttribute('text-anchor', 'middle');
+            t.setAttribute('fill', '#64748b');
+            t.setAttribute('font-size', '8.5px');
+            t.setAttribute('font-weight', '500');
+            t.textContent = l;
+            g.appendChild(t);
+          });
+        }
+
+        g.addEventListener('mousedown', startDrag);
+        g.addEventListener('touchstart', startDrag, { passive: false });
+        nodesGroup.appendChild(g);
+      });
+    }
+
+    function getMousePosition(evt) {
+      const CTM = svg.getScreenCTM();
+      let clientX = evt.clientX;
+      let clientY = evt.clientY;
+      if (evt.touches && evt.touches.length) {
+        clientX = evt.touches[0].clientX;
+        clientY = evt.touches[0].clientY;
+      }
+      return { x: (clientX - CTM.e) / CTM.a, y: (clientY - CTM.f) / CTM.d };
+    }
+
+    function startDrag(evt) {
+      evt.preventDefault();
+      const id = evt.currentTarget.getAttribute('data-id');
+      draggedNode = state.nodes.find(n => n.id === id);
+      dragMoved = false;
+      if (draggedNode) {
+        const pos = getMousePosition(evt);
+        startPos = { x: pos.x, y: pos.y };
+        offset.x = pos.x - draggedNode.x;
+        offset.y = pos.y - draggedNode.y;
+      }
+    }
+
+    function drag(evt) {
+      if (!draggedNode) return;
+      evt.preventDefault();
+      const pos = getMousePosition(evt);
+      if (Math.hypot(pos.x - startPos.x, pos.y - startPos.y) > 4) dragMoved = true;
+      draggedNode.x = Math.max(50, Math.min(pos.x - offset.x, 940));
+      draggedNode.y = Math.max(45, Math.min(pos.y - offset.y, 400));
+      render();
+    }
+
+    function endDrag() {
+      if (draggedNode && !dragMoved) loadToEdit(draggedNode);
+      draggedNode = null;
+      dragMoved = false;
+    }
+
+    svg.addEventListener('mousemove', drag);
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+    svg.addEventListener('touchmove', drag, { passive: false });
+    svg.addEventListener('touchend', endDrag);
+
+    async function capture() {
+      return await html2canvas(document.getElementById('pdf-content'), {
+        scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 1040, height: 730
+      });
+    }
+
+    document.getElementById('btn-export-png').addEventListener('click', async () => {
+      const c = await capture();
+      const a = document.createElement('a');
+      a.download = `Ecomapa_Familia_Rosangela.png`;
+      a.href = c.toDataURL('image/png');
+      a.click();
+    });
+
+    document.getElementById('btn-export-pdf').addEventListener('click', async () => {
+      const c = await capture();
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+      pdf.addImage(c.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, 297, 210);
+      pdf.save(`Ecomapa_Familia_Rosangela.pdf`);
+    });
+
+    render();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,851 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UIUSAS Genograma Maker PRO - FamÃ­lia de RosÃ¢ngela</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @page { size: A4 landscape; margin: 0; }
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      #pdf-content { width: 297mm !important; height: 210mm !important; max-width: 297mm !important; min-height: 210mm !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 8mm 10mm !important; }
+    }
+    .canvas-grid { background-size: 24px 24px; background-image: radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-indigo-50/20 to-slate-200 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Header com NavegaÃ§Ã£o -->
+  <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl px-6 py-2.5 flex flex-wrap justify-between items-center border-b border-indigo-900/40 relative z-20 no-print">
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 ring-2 ring-white/20">
+        <i data-lucide="dna" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">
+            UIUSAS Genograma Maker
+          </h1>
+          <span class="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            CASO ROSÃ‚NGELA
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium">Alunos: Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 mt-2 sm:mt-0">
+      <a href="ecomapa.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="share-2" class="w-3.5 h-3.5 text-teal-400"></i>
+        <span>Ecomapa</span>
+      </a>
+
+      <a href="pts.html" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition">
+        <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-rose-400"></i>
+        <span>PTS</span>
+      </a>
+
+      <button id="btn-export-png" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md transition transform active:scale-95">
+        <i data-lucide="image" class="w-3.5 h-3.5"></i>
+        <span>PNG</span>
+      </button>
+
+      <button id="btn-export-pdf" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-lg transition transform active:scale-95">
+        <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+        <span>Exportar PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Container -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+    
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-96 bg-white/95 border-r border-slate-200/80 p-4 flex flex-col gap-3.5 overflow-y-auto no-print shadow-sm z-10">
+      
+      <section class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 shadow-sm space-y-2">
+        <h2 class="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="file-signature" class="w-3.5 h-3.5 text-indigo-600"></i>
+          Dados da Equipe & Laudo
+        </h2>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Alunos / ResponsÃ¡veis</label>
+          <input type="text" id="input-responsible" value="Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues" class="w-full text-xs font-medium px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">TÃ­tulo</label>
+            <input type="text" id="input-report-title" value="Genograma Familiar - RosÃ¢ngela" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Data</label>
+            <input type="date" id="input-date" class="w-full text-xs font-medium border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+          </div>
+        </div>
+      </section>
+
+      <!-- FormulÃ¡rio de Membro -->
+      <section id="member-form-card" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 id="form-title" class="text-xs font-bold text-slate-800 uppercase tracking-wider">Membro Familiar</h2>
+          <span id="badge-editing" class="hidden text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">EdiÃ§Ã£o</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Nome</label>
+          <input type="text" id="node-name" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Tipo</label>
+            <select id="node-gender" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white">
+              <option value="male">â–  Homem</option>
+              <option value="female">â— Mulher</option>
+              <option value="pregnancy">â–² Gravidez / Feto</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Idade / Sigla</label>
+            <input type="text" id="node-age" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">AnotaÃ§Ãµes ClÃ­nicas</label>
+          <textarea id="node-notes" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5"></textarea>
+        </div>
+
+        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/80 space-y-1.5 text-xs text-slate-700">
+          <label class="flex items-center gap-2 cursor-pointer font-semibold text-indigo-950 text-[11px]">
+            <input type="checkbox" id="node-interviewed" class="rounded text-indigo-600">
+            <span>Cliente entrevistada (CÃ­rculo Duplo)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-amber-900 font-semibold text-[11px]">
+            <input type="checkbox" id="node-alcohol" class="rounded text-amber-600">
+            <span>Abuso de Ã¡lcool [ALC]</span>
+          </label>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button id="btn-save-node" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 rounded-lg transition">
+            Salvar / Adicionar Membro
+          </button>
+          <button id="btn-cancel-edit" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg">
+            Cancelar
+          </button>
+        </div>
+      </section>
+
+      <!-- Morando Junto -->
+      <section class="bg-indigo-50/40 p-3 rounded-xl border border-indigo-200/80 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Morando Junto (Casa)</span>
+          </h2>
+        </div>
+        <p class="text-[10px] text-slate-500">Membros no mesmo domicÃ­lio (polÃ­gono pontilhado envolvente):</p>
+        <div id="household-members-list" class="max-h-24 overflow-y-auto space-y-1 bg-white p-2 rounded-lg border border-slate-200 text-xs"></div>
+        <button id="btn-apply-household" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 rounded-lg transition">
+          Atualizar DomicÃ­lio
+        </button>
+      </section>
+
+    </aside>
+
+    <!-- Canvas Central -->
+    <main class="flex-1 p-4 lg:p-6 overflow-auto flex justify-center items-start">
+      
+      <div id="pdf-content" class="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-[1040px] h-[730px] max-w-[1040px] max-h-[730px] flex flex-col p-6 transition-all relative overflow-hidden box-border">
+        
+        <!-- Topo do Documento -->
+        <div class="border-b-2 border-indigo-500/20 pb-2.5 mb-2 flex justify-between items-start flex-shrink-0">
+          <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+              <span class="text-[10px] uppercase tracking-widest font-bold text-indigo-600">
+                AvaliaÃ§Ã£o SistÃªmica e Familiar
+              </span>
+            </div>
+            <h2 id="display-report-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Genograma Familiar - FamÃ­lia de RosÃ¢ngela
+            </h2>
+            <div class="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
+              <div class="flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                <span>Data: <strong id="display-date" class="text-slate-700"></strong></span>
+              </div>
+              <span class="text-slate-300">â€¢</span>
+              <div class="flex items-center gap-1 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded">
+                <i data-lucide="users" class="w-3 h-3 text-indigo-600"></i>
+                <span class="text-slate-600">Alunos: <strong id="display-responsible" class="text-indigo-900 font-bold">Ana Beatriz Mamede, AndrÃ© Matos, Ãtalo Denner, Wilson Rodrigues</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-right">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/60 text-indigo-950 text-xs font-extrabold shadow-sm">
+              <i data-lucide="dna" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>UIUSAS GENOGRAMA</span>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-0.5 font-medium">RepresentaÃ§Ã£o GrÃ¡fica Familiar</p>
+          </div>
+        </div>
+
+        <!-- Ãrea do Canvas SVG -->
+        <div id="genogram-canvas-container" class="relative flex-1 w-full h-[455px] min-h-[455px] max-h-[455px] bg-white border border-slate-200 rounded-xl canvas-grid overflow-hidden flex-shrink-0">
+          
+          <div class="absolute top-2 right-2 text-[10px] bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-slate-500 no-print flex items-center gap-1.5 shadow-sm z-10">
+            <i data-lucide="mouse-pointer-click" class="w-3 h-3 text-indigo-600"></i>
+            <span>Clique num membro para <strong>editar</strong> ou arraste para <strong>posicionar</strong></span>
+          </div>
+
+          <svg id="genogram-svg" viewBox="0 0 990 455" class="w-full h-full select-none">
+            <g id="svg-household"></g>
+            <g id="svg-links"></g>
+            <g id="svg-nodes"></g>
+          </svg>
+        </div>
+
+        <!-- LEGENDA CONFORME O MANUSCRITO -->
+        <div class="mt-2 p-2 bg-slate-50/90 border border-slate-200/90 rounded-xl text-slate-700 flex-shrink-0">
+          <div class="flex items-center gap-1.5 mb-1 pb-0.5 border-b border-slate-200">
+            <i data-lucide="bookmark" class="w-3 h-3 text-indigo-600"></i>
+            <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-800">Legenda Conforme Manuscrito</h3>
+          </div>
+          
+          <div class="grid grid-cols-4 gap-y-1.5 gap-x-3 text-[10px]">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 rounded-full border-2 border-indigo-600 border-double flex-shrink-0 bg-white"></span>
+              <span class="truncate"><strong>RosÃ¢ngela (G)</strong> Cliente entrevistada</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 border border-slate-700 flex-shrink-0 relative overflow-hidden bg-white">
+                <span class="absolute bottom-0 inset-x-0 h-1/2 bg-amber-500"></span>
+              </span>
+              <span class="truncate"><strong>Marcos (M40)</strong> Abuso de Ã¡lcool (ALC)</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-rose-600 font-bold font-mono text-xs">ã€°ã€°ã€°</span>
+              <span class="text-rose-700 truncate font-semibold">RelaÃ§Ã£o fundida e conflituosa</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-500 font-mono text-[9px] tracking-tight">â”„â”„/â”„â”„</span>
+              <span class="truncate"><strong>RelaÃ§Ã£o distante c/ separaÃ§Ã£o</strong></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[11px] border-b-slate-700 flex-shrink-0"></span>
+              <span class="truncate"><strong>Gravidez atual (27Âª sem)</strong></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-5 h-3.5 border border-dashed border-indigo-600 rounded bg-indigo-50/60 flex-shrink-0"></span>
+              <span class="truncate"><strong>Morando junto (DomicÃ­lio)</strong></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-700 font-mono text-[10px] font-bold">â—„â€•â€•â–º</span>
+              <span class="truncate"><strong>RelaÃ§Ã£o prÃ³xima (Ana Clara e Namorado)</strong></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 border border-slate-700 bg-white flex-shrink-0 flex items-center justify-center text-[8px] font-bold">TEA</span>
+              <span class="truncate"><strong>Pedro (P11)</strong> TEA (suporte moderado)</span>
+            </div>
+          </div>
+        </div>
+
+        <footer class="mt-1.5 pt-1 text-[9px] text-slate-400 flex justify-between items-center flex-shrink-0">
+          <div class="flex items-center gap-1">
+            <strong class="text-slate-600">UIUSAS Genograma Maker PRO</strong>
+            <span>â€¢</span>
+            <span>Estudo de Caso da FamÃ­lia de RosÃ¢ngela â€¢ SaÃºde da FamÃ­lia e Comunidade</span>
+          </div>
+          <span>PÃ¡gina 1 de 1</span>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const today = new Date();
+    document.getElementById('input-date').value = today.toISOString().split('T')[0];
+    document.getElementById('display-date').textContent = today.toLocaleDateString('pt-BR');
+
+    // ESTADO ESTRITAMENTE IDÃŠNTICO AO MANUSCRITO DA FOLHA
+        const state = {
+      editingId: null,
+      householdIds: ['1', '2', '3'],
+      nodes: [
+        { id: '1', name: 'Membro 1', gender: 'male', age: '45', notes: 'Hígido', interviewed: false, alcohol: false, x: 380, y: 120 },
+        { id: '2', name: 'Membro 2', gender: 'female', age: '42', notes: 'Paciente Índice', interviewed: true, alcohol: false, x: 600, y: 120 },
+        { id: '3', name: 'Filho(a)', gender: 'male', age: '14', notes: 'Estudante', interviewed: false, alcohol: false, x: 490, y: 280 }
+      ],
+      links: [
+        { id: 'l1', from: '1', to: '2', type: 'fused_conflict' },
+        { id: 'l2', from: '1', to: '3', type: 'parent_child' },
+        { id: 'l3', from: '2', to: '3', type: 'parent_child' }
+      ]
+    };
+
+    lucide.createIcons();
+
+    // SincronizaÃ§Ã£o
+    const inputResp = document.getElementById('input-responsible');
+    const dispResp = document.getElementById('display-responsible');
+    inputResp.addEventListener('input', (e) => { dispResp.textContent = e.target.value.trim() || 'â€”'; });
+
+    const inputTitle = document.getElementById('input-report-title');
+    const dispTitle = document.getElementById('display-report-title');
+    inputTitle.addEventListener('input', (e) => { dispTitle.textContent = e.target.value.trim() || 'Genograma'; });
+
+    const inputDate = document.getElementById('input-date');
+    const dispDate = document.getElementById('display-date');
+    inputDate.addEventListener('change', (e) => {
+      if (e.target.value) {
+        const [y, m, d] = e.target.value.split('-');
+        dispDate.textContent = `${d}/${m}/${y}`;
+      }
+    });
+
+    const formTitle = document.getElementById('form-title');
+    const badgeEditing = document.getElementById('badge-editing');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
+    const inputName = document.getElementById('node-name');
+    const inputGender = document.getElementById('node-gender');
+    const inputAge = document.getElementById('node-age');
+    const inputNotes = document.getElementById('node-notes');
+    const checkInterviewed = document.getElementById('node-interviewed');
+    const checkAlcohol = document.getElementById('node-alcohol');
+
+    const svg = document.getElementById('genogram-svg');
+    const householdGroup = document.getElementById('svg-household');
+    const linksGroup = document.getElementById('svg-links');
+    const nodesGroup = document.getElementById('svg-nodes');
+    const householdMembersList = document.getElementById('household-members-list');
+
+    let draggedNode = null;
+    let dragMoved = false;
+    let offset = { x: 0, y: 0 };
+    let startPos = { x: 0, y: 0 };
+
+    function wrapText(text, maxChars = 24) {
+      if (!text) return [];
+      const words = text.split(' ');
+      const lines = [];
+      let cur = '';
+      words.forEach(w => {
+        if ((cur + (cur ? ' ' : '') + w).length <= maxChars) cur += (cur ? ' ' : '') + w;
+        else { if (cur) lines.push(cur); cur = w; }
+      });
+      if (cur) lines.push(cur);
+      return lines;
+    }
+
+    function populateHouseholdList() {
+      householdMembersList.innerHTML = '';
+      state.nodes.forEach(n => {
+        const checked = state.householdIds.includes(n.id);
+        const l = document.createElement('label');
+        l.className = 'flex items-center gap-1.5 hover:bg-slate-50 p-1 rounded cursor-pointer';
+        l.innerHTML = `
+          <input type="checkbox" value="${n.id}" class="chk-house rounded text-indigo-600" ${checked ? 'checked' : ''}>
+          <span class="truncate">${n.name}</span>
+        `;
+        householdMembersList.appendChild(l);
+      });
+    }
+
+    document.getElementById('btn-apply-household').addEventListener('click', () => {
+      const boxes = document.querySelectorAll('.chk-house:checked');
+      state.householdIds = Array.from(boxes).map(b => b.value);
+      render();
+    });
+
+    function getBorderPoint(n1, n2) {
+      const dx = n2.x - n1.x;
+      const dy = n2.y - n1.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist === 0) return { x: n1.x, y: n1.y };
+      const r = 24;
+      return { x: n1.x + (dx / dist) * r, y: n1.y + (dy / dist) * r };
+    }
+
+    // Zigue-zague com linha dupla fundida (RelaÃ§Ã£o fundida e conflituosa do manuscrito)
+    function createFusedConflictPath(x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+      if (dist === 0) return '';
+
+      const ux = dx / dist;
+      const uy = dy / dist;
+      const nx = -uy;
+      const ny = ux;
+
+      const numZigs = Math.max(6, Math.floor(dist / 12));
+      const step = dist / numZigs;
+      const amp = 8;
+
+      let d = `M ${x1} ${y1}`;
+      for (let i = 1; i < numZigs; i++) {
+        const cur = i * step;
+        const side = (i % 2 === 1) ? 1 : -1;
+        const px = x1 + ux * cur + nx * (amp * side);
+        const py = y1 + uy * cur + ny * (amp * side);
+        d += ` L ${px.toFixed(1)} ${py.toFixed(1)}`;
+      }
+      d += ` L ${x2} ${y2}`;
+      return d;
+    }
+
+    function loadToEdit(n) {
+      state.editingId = n.id;
+      inputName.value = n.name;
+      inputGender.value = n.gender;
+      inputAge.value = n.age;
+      inputNotes.value = n.notes;
+      checkInterviewed.checked = !!n.interviewed;
+      checkAlcohol.checked = !!n.alcohol;
+
+      formTitle.textContent = 'Editar Membro';
+      badgeEditing.classList.remove('hidden');
+      btnCancelEdit.classList.remove('hidden');
+      render();
+    }
+
+    function resetForm() {
+      state.editingId = null;
+      inputName.value = '';
+      inputGender.value = 'male';
+      inputAge.value = '';
+      inputNotes.value = '';
+      checkInterviewed.checked = false;
+      checkAlcohol.checked = false;
+
+      formTitle.textContent = 'Membro Familiar';
+      badgeEditing.classList.add('hidden');
+      btnCancelEdit.classList.add('hidden');
+      render();
+    }
+
+    btnCancelEdit.addEventListener('click', resetForm);
+
+    document.getElementById('btn-save-node').addEventListener('click', () => {
+      const name = inputName.value.trim();
+      if (!name) return alert('Digite o nome do membro.');
+
+      if (state.editingId) {
+        const n = state.nodes.find(item => item.id === state.editingId);
+        if (n) {
+          n.name = name;
+          n.gender = inputGender.value;
+          n.age = inputAge.value.trim();
+          n.notes = inputNotes.value.trim();
+          n.interviewed = checkInterviewed.checked;
+          n.alcohol = checkAlcohol.checked;
+        }
+        resetForm();
+      } else {
+        state.nodes.push({
+          id: String(Date.now()),
+          name,
+          gender: inputGender.value,
+          age: inputAge.value.trim(),
+          notes: inputNotes.value.trim(),
+          interviewed: checkInterviewed.checked,
+          alcohol: checkAlcohol.checked,
+          x: 400,
+          y: 200
+        });
+        resetForm();
+      }
+      render();
+    });
+
+    function render() {
+      // 0. POLÃGONO DOMICILIAR
+      householdGroup.innerHTML = '';
+      const houseNodes = state.nodes.filter(n => state.householdIds.includes(n.id));
+      if (houseNodes.length > 0) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        houseNodes.forEach(n => {
+          minX = Math.min(minX, n.x - 70);
+          maxX = Math.max(maxX, n.x + 70);
+          minY = Math.min(minY, n.y - 40);
+          maxY = Math.max(maxY, n.y + 65);
+        });
+        const pad = 14;
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', Math.max(10, minX - pad));
+        rect.setAttribute('y', Math.max(10, minY - pad));
+        rect.setAttribute('width', (maxX - minX) + pad * 2);
+        rect.setAttribute('height', (maxY - minY) + pad * 2);
+        rect.setAttribute('rx', '24');
+        rect.setAttribute('fill', 'rgba(238, 242, 255, 0.45)');
+        rect.setAttribute('stroke', '#4f46e5');
+        rect.setAttribute('stroke-width', '2');
+        rect.setAttribute('stroke-dasharray', '8, 6');
+        householdGroup.appendChild(rect);
+
+        // Tag Casa
+        const tag = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        tag.setAttribute('x', minX + 5);
+        tag.setAttribute('y', minY - pad + 15);
+        tag.setAttribute('fill', '#4f46e5');
+        tag.setAttribute('font-size', '10px');
+        tag.setAttribute('font-weight', 'bold');
+        tag.textContent = 'Morando Junto (DomicÃ­lio)';
+        householdGroup.appendChild(tag);
+      }
+
+      // 1. LINKS CONFORME MANUSCRITO
+      linksGroup.innerHTML = '';
+      state.links.forEach(l => {
+        const n1 = state.nodes.find(n => n.id === l.from);
+        const n2 = state.nodes.find(n => n.id === l.to);
+        if (!n1 || !n2) return;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        if (l.type === 'parent_child') {
+          // Degrau
+          const p1Y = n1.y + 24;
+          const p2Y = n2.y - 24;
+          const midY = (p1Y + p2Y) / 2;
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', `M ${n1.x} ${p1Y} L ${n1.x} ${midY} L ${n2.x} ${midY} L ${n2.x} ${p2Y}`);
+          path.setAttribute('stroke', '#475569');
+          path.setAttribute('stroke-width', '2');
+          path.setAttribute('fill', 'none');
+          g.appendChild(path);
+
+        } else if (l.type === 'fused_conflict') {
+          // RelaÃ§Ã£o fundida e conflituosa (manuscrito: zigue-zague sobre linha contÃ­nua)
+          const pt1 = getBorderPoint(n1, n2);
+          const pt2 = getBorderPoint(n2, n1);
+
+          // Linha de base contÃ­nua (fundida)
+          const baseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          baseLine.setAttribute('x1', pt1.x);
+          baseLine.setAttribute('y1', pt1.y);
+          baseLine.setAttribute('x2', pt2.x);
+          baseLine.setAttribute('y2', pt2.y);
+          baseLine.setAttribute('stroke', '#0f172a');
+          baseLine.setAttribute('stroke-width', '2.5');
+          g.appendChild(baseLine);
+
+          // Zigue-zague conflituoso sobreposto
+          const zig = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          zig.setAttribute('d', createFusedConflictPath(pt1.x, pt1.y, pt2.x, pt2.y));
+          zig.setAttribute('stroke', '#ef4444');
+          zig.setAttribute('stroke-width', '2.5');
+          zig.setAttribute('fill', 'none');
+          g.appendChild(zig);
+
+        } else if (l.type === 'separation_distant') {
+          // RelaÃ§Ã£o distante com separaÃ§Ã£o (manuscrito: - - - / - - -)
+          const pt1 = getBorderPoint(n1, n2);
+          const pt2 = getBorderPoint(n2, n1);
+
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', pt1.x);
+          line.setAttribute('y1', pt1.y);
+          line.setAttribute('x2', pt2.x);
+          line.setAttribute('y2', pt2.y);
+          line.setAttribute('stroke', '#94a3b8');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('stroke-dasharray', '5, 4');
+          g.appendChild(line);
+
+          // Barra diagonal de corte / separaÃ§Ã£o
+          const mx = (pt1.x + pt2.x) / 2;
+          const my = (pt1.y + pt2.y) / 2;
+          const slash = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          slash.setAttribute('x1', mx - 4);
+          slash.setAttribute('y1', my - 8);
+          slash.setAttribute('x2', mx + 4);
+          slash.setAttribute('y2', my + 8);
+          slash.setAttribute('stroke', '#dc2626');
+          slash.setAttribute('stroke-width', '2.5');
+          g.appendChild(slash);
+
+        } else if (l.type === 'close_bidirectional') {
+          // Seta bidirecional (Ana Clara e Namorado â—„â€•â€•â–º)
+          const pt1 = getBorderPoint(n1, n2);
+          const pt2 = getBorderPoint(n2, n1);
+
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', pt1.x);
+          line.setAttribute('y1', pt1.y);
+          line.setAttribute('x2', pt2.x);
+          line.setAttribute('y2', pt2.y);
+          line.setAttribute('stroke', '#4338ca');
+          line.setAttribute('stroke-width', '2.5');
+          g.appendChild(line);
+
+          // Setas nas duas pontas
+          const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t1.setAttribute('x', pt1.x + 8);
+          t1.setAttribute('y', pt1.y + 4);
+          t1.setAttribute('fill', '#4338ca');
+          t1.setAttribute('font-size', '12px');
+          t1.setAttribute('font-weight', 'bold');
+          t1.textContent = 'â—„';
+          g.appendChild(t1);
+
+          const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t2.setAttribute('x', pt2.x - 14);
+          t2.setAttribute('y', pt2.y + 4);
+          t2.setAttribute('fill', '#4338ca');
+          t2.setAttribute('font-size', '12px');
+          t2.setAttribute('font-weight', 'bold');
+          t2.textContent = 'â–º';
+          g.appendChild(t2);
+        }
+
+        linksGroup.appendChild(g);
+      });
+
+      // 2. NODES
+      nodesGroup.innerHTML = '';
+      state.nodes.forEach(n => {
+        const isEditing = state.editingId === n.id;
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${n.x}, ${n.y})`);
+        g.setAttribute('data-id', n.id);
+        g.classList.add('cursor-pointer');
+
+        const size = 46;
+        const half = size / 2;
+
+        if (isEditing) {
+          const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('r', half + 9);
+          ring.setAttribute('fill', 'none');
+          ring.setAttribute('stroke', '#f59e0b');
+          ring.setAttribute('stroke-width', '2.5');
+          ring.setAttribute('stroke-dasharray', '4, 3');
+          g.appendChild(ring);
+        }
+
+        // Clip-path para Ã¡lcool
+        const clipId = `clip-alc-${n.id}`;
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const clip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+        clip.setAttribute('id', clipId);
+        const clipRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        clipRect.setAttribute('x', -half - 5);
+        clipRect.setAttribute('y', 0);
+        clipRect.setAttribute('width', size + 10);
+        clipRect.setAttribute('height', half + 5);
+        clip.appendChild(clipRect);
+        defs.appendChild(clip);
+        g.appendChild(defs);
+
+        // Forma GeomÃ©trica
+        let shape;
+        if (n.gender === 'female') {
+          shape = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          shape.setAttribute('r', half);
+        } else if (n.gender === 'male') {
+          shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          shape.setAttribute('x', -half);
+          shape.setAttribute('y', -half);
+          shape.setAttribute('width', size);
+          shape.setAttribute('height', size);
+          shape.setAttribute('rx', '4');
+        } else if (n.gender === 'pregnancy') {
+          shape = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          shape.setAttribute('points', `0,-${half + 4} ${half + 4},${half + 2} -${half + 4},${half + 2}`);
+        }
+        shape.setAttribute('fill', '#ffffff');
+        shape.setAttribute('stroke', n.interviewed ? '#4f46e5' : '#0f172a');
+        shape.setAttribute('stroke-width', n.interviewed ? '3.5' : '2.2');
+        g.appendChild(shape);
+
+        // Abuso de Ã¡lcool (metade preenchida)
+        if (n.alcohol) {
+          const alc = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          alc.setAttribute('x', -half);
+          alc.setAttribute('y', -half);
+          alc.setAttribute('width', size);
+          alc.setAttribute('height', size);
+          alc.setAttribute('fill', '#d97706');
+          alc.setAttribute('clip-path', `url(#${clipId})`);
+          g.appendChild(alc);
+
+          // Tag ALC
+          const alcT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          alcT.setAttribute('x', half + 4);
+          alcT.setAttribute('y', -half + 2);
+          alcT.setAttribute('fill', '#b45309');
+          alcT.setAttribute('font-size', '9.5px');
+          alcT.setAttribute('font-weight', 'bold');
+          alcT.textContent = 'ALC';
+          g.appendChild(alcT);
+        }
+
+        // Borda dupla se for a entrevistada (RosÃ¢ngela)
+        if (n.interviewed) {
+          const inner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          inner.setAttribute('r', half - 5);
+          inner.setAttribute('fill', 'none');
+          inner.setAttribute('stroke', '#6366f1');
+          inner.setAttribute('stroke-width', '1.8');
+          g.appendChild(inner);
+        }
+
+        // Idade / Sigla no centro
+        if (n.age) {
+          const tAge = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          tAge.setAttribute('x', 0);
+          tAge.setAttribute('y', n.gender === 'pregnancy' ? 2 : 0);
+          tAge.setAttribute('text-anchor', 'middle');
+          tAge.setAttribute('dominant-baseline', 'central');
+          tAge.setAttribute('fill', '#0f172a');
+          tAge.setAttribute('font-size', '12px');
+          tAge.setAttribute('font-weight', '700');
+          tAge.textContent = n.age;
+          g.appendChild(tAge);
+        }
+
+        // Nome e notas abaixo
+        const notesLines = wrapText(n.notes, 22);
+        const cardW = Math.min(160, Math.max(68, (n.name.length + 2) * 7));
+        const cardH = 18 + (notesLines.length * 11);
+
+        const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        textBg.setAttribute('x', -cardW / 2);
+        textBg.setAttribute('y', half + 4);
+        textBg.setAttribute('width', cardW);
+        textBg.setAttribute('height', cardH);
+        textBg.setAttribute('fill', 'rgba(255, 255, 255, 0.95)');
+        textBg.setAttribute('stroke', isEditing ? '#f59e0b' : '#e2e8f0');
+        textBg.setAttribute('rx', '4');
+        g.appendChild(textBg);
+
+        const tName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        tName.setAttribute('x', 0);
+        tName.setAttribute('y', half + 16);
+        tName.setAttribute('text-anchor', 'middle');
+        tName.setAttribute('fill', '#0f172a');
+        tName.setAttribute('font-size', '11px');
+        tName.setAttribute('font-weight', '700');
+        tName.textContent = n.name;
+        g.appendChild(tName);
+
+        notesLines.forEach((line, lIdx) => {
+          const tNote = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          tNote.setAttribute('x', 0);
+          tNote.setAttribute('y', half + 27 + (lIdx * 11));
+          tNote.setAttribute('text-anchor', 'middle');
+          tNote.setAttribute('fill', '#64748b');
+          tNote.setAttribute('font-size', '8.5px');
+          tNote.setAttribute('font-weight', '500');
+          tNote.textContent = line;
+          g.appendChild(tNote);
+        });
+
+        g.addEventListener('mousedown', startDrag);
+        g.addEventListener('touchstart', startDrag, { passive: false });
+
+        nodesGroup.appendChild(g);
+      });
+
+      populateHouseholdList();
+    }
+
+    function getMousePosition(evt) {
+      const CTM = svg.getScreenCTM();
+      let clientX = evt.clientX;
+      let clientY = evt.clientY;
+      if (evt.touches && evt.touches.length) {
+        clientX = evt.touches[0].clientX;
+        clientY = evt.touches[0].clientY;
+      }
+      return { x: (clientX - CTM.e) / CTM.a, y: (clientY - CTM.f) / CTM.d };
+    }
+
+    function startDrag(evt) {
+      evt.preventDefault();
+      const id = evt.currentTarget.getAttribute('data-id');
+      draggedNode = state.nodes.find(n => n.id === id);
+      dragMoved = false;
+      if (draggedNode) {
+        const pos = getMousePosition(evt);
+        startPos = { x: pos.x, y: pos.y };
+        offset.x = pos.x - draggedNode.x;
+        offset.y = pos.y - draggedNode.y;
+      }
+    }
+
+    function drag(evt) {
+      if (!draggedNode) return;
+      evt.preventDefault();
+      const pos = getMousePosition(evt);
+      if (Math.hypot(pos.x - startPos.x, pos.y - startPos.y) > 4) dragMoved = true;
+      draggedNode.x = Math.max(40, Math.min(pos.x - offset.x, 940));
+      draggedNode.y = Math.max(40, Math.min(pos.y - offset.y, 400));
+      render();
+    }
+
+    function endDrag() {
+      if (draggedNode && !dragMoved) loadToEdit(draggedNode);
+      draggedNode = null;
+      dragMoved = false;
+    }
+
+    svg.addEventListener('mousemove', drag);
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+    svg.addEventListener('touchmove', drag, { passive: false });
+    svg.addEventListener('touchend', endDrag);
+
+    // ExportaÃ§Ã£o
+    async function capture() {
+      return await html2canvas(document.getElementById('pdf-content'), {
+        scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 1040, height: 730
+      });
+    }
+
+    document.getElementById('btn-export-png').addEventListener('click', async () => {
+      const c = await capture();
+      const a = document.createElement('a');
+      a.download = `Genograma_Familia_Rosangela.png`;
+      a.href = c.toDataURL('image/png');
+      a.click();
+    });
+
+    document.getElementById('btn-export-pdf').addEventListener('click', async () => {
+      const c = await capture();
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+      pdf.addImage(c.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, 297, 210);
+      pdf.save(`Genograma_Familia_Rosangela.pdf`);
+    });
+
+    render();
+  </script>
+</body>
+</html>
+

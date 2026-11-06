@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UIUSAS Clinical Suite - Genograma, Ecomapa e PTS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="px-6 py-6 border-b border-indigo-900/40 backdrop-blur-md bg-slate-950/40 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-3.5">
+        <div class="h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 ring-2 ring-white/20">
+          <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black tracking-tight bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">
+              UIUSAS Clinical Suite
+            </h1>
+            <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+              Open Source
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">Plataforma Web para Avaliação Sistêmica, Familiar e Atenção Psicossocial</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/uiusasdevelopment/uiusas-family-tools" target="_blank" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-700 transition">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          <span>Repositório GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-6xl mx-auto px-6 py-12 flex-1 flex flex-col justify-center">
+    
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+        Instrumentos de Avaliação Familiar & Cuidado Singular
+      </h2>
+      <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+        Soluções interativas com drag & drop, edição em tempo real e exportação direta em <strong>PDF (A4 profissional)</strong> e <strong>imagem PNG de alta definição</strong> para prontuários.
+      </p>
+    </div>
+
+    <!-- Cards dos 3 Programas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- 1. Genograma Maker -->
+      <div class="group bg-slate-800/60 hover:bg-slate-800/90 border border-slate-700/80 hover:border-indigo-500/60 rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/20 flex flex-col justify-between">
+        <div>
+          <div class="h-12 w-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="dna" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">Mapeamento Genético & Vínculos</span>
+          <h3 class="text-xl font-bold text-white mb-2">Genograma Maker</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-6">
+            Construa genogramas tri-geracionais completos com convenções internacionais, paciente índice, abuso de álcool (ALC), gravidez (&Delta;), vínculos conflituosos, distantes e polígono domiciliar (morando junto).
+          </p>
+        </div>
+        <a href="genograma.html" class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+          <span>Abrir Genograma Maker</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- 2. Ecomapa Maker -->
+      <div class="group bg-slate-800/60 hover:bg-slate-800/90 border border-slate-700/80 hover:border-teal-500/60 rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-teal-500/20 flex flex-col justify-between">
+        <div>
+          <div class="h-12 w-12 rounded-2xl bg-teal-600/20 border border-teal-500/30 flex items-center justify-center text-teal-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="share-2" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-teal-400 block mb-1">Redes de Apoio Comunitário</span>
+          <h3 class="text-xl font-bold text-white mb-2">Ecomapa Maker</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-6">
+            Mapeie o fluxo de energia e suporte social entre a família e as instituições externas (USF, CAPS, Escola, Trabalho, Igreja). Vínculos fortes, moderados, tênues, estressantes e direções de fluxo.
+          </p>
+        </div>
+        <a href="ecomapa.html" class="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-3 rounded-xl shadow-lg shadow-teal-600/30 transition transform active:scale-95">
+          <span>Abrir Ecomapa Maker</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- 3. PTS Maker -->
+      <div class="group bg-slate-800/60 hover:bg-slate-800/90 border border-slate-700/80 hover:border-rose-500/60 rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-rose-500/20 flex flex-col justify-between">
+        <div>
+          <div class="h-12 w-12 rounded-2xl bg-rose-600/20 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="clipboard-check" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-1">Plano Singular Interdisciplinar</span>
+          <h3 class="text-xl font-bold text-white mb-2">PTS Maker</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-6">
+            Projeto Terapêutico Singular baseado nas diretrizes do HumanizaSUS: diagnóstico multidimensional, metas temporais (curto/médio/longo prazo), matriz de ações/responsabilidades e gestor de curso do caso.
+          </p>
+        </div>
+        <a href="pts.html" class="w-full flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold py-3 rounded-xl shadow-lg shadow-rose-600/30 transition transform active:scale-95">
+          <span>Abrir PTS Maker</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-4">
+      <p>Desenvolvido para apoio a profissionais e estudantes de Medicina, Enfermagem, Psicologia e Serviço Social.</p>
+      <p class="text-slate-400 font-semibold">UIUSAS Clinical Suite • Hospedado com GitHub Pages</p>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
